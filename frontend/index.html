@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="SwiftCourier — production courier management: booking, live tracking, pricing, and revenue." />
+    <meta name="theme-color" content="#070b14" />
+    <title>SwiftCourier — Courier Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      // Dark-first primary experience (Linear/Railway pattern): stored choice
+      // wins; first visit is always dark. Flash-free — runs before paint.
+      try {
+        var t = localStorage.getItem("swc-theme");
+        document.documentElement.setAttribute("data-theme", t === "light" ? "light" : "dark");
+      } catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
+    </script>
+    <style>
+      #root:empty { min-height: 100vh; background: #070b14; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

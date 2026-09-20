@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+.env
+node_modules/
+dist/
+pgdata/
+test.db
+test_contract.db
+playwright-report/
+test-results/
+.DS_Store

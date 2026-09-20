@@ -1,0 +1,130 @@
+# SwiftCourier full-stack — Compose v2 spec (no `version:` key).
+# Verified pattern 2026: pinned tags, health-gated depends_on, named volumes,
+# split networks (backend internal), restart policies, log rotation, limits.
+# Run:  docker compose up -d --build   →  app http://localhost:8080 · api http://localhost:8000/docs
+
+name: swiftcourier
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-courier}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-courierpass}
+      POSTGRES_DB: ${POSTGRES_DB:-courierdb}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-courier} -d ${POSTGRES_DB:-courierdb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-courier}:${POSTGRES_PASSWORD:-courierpass}@db:5432/${POSTGRES_DB:-courierdb}
+      REDIS_URL: redis://cache:6379/0
+      CORS_ORIGINS: http://localhost:8080,http://localhost:8081,http://localhost:5173
+      BASE_FEE_USD: ${BASE_FEE_USD:-6.99}
+      RATE_PER_KG_USD: ${RATE_PER_KG_USD:-4.50}
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    ports:
+      - "${API_PORT:-8000}:8000"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+
+  cache:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - redisdata:/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 192M
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks:
+      - frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${APP_PORT:-8080}:80"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+
+networks:
+  frontend:
+    ipam:
+      config:
+        - subnet: 10.200.10.0/24
+  backend:
+    internal: true
+    ipam:
+      config:
+        - subnet: 10.200.11.0/24
+
+volumes:
+  pgdata:
+  redisdata:
