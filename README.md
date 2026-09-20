@@ -2,7 +2,7 @@
 
 > Production full-stack courier SaaS: FastAPI + PostgreSQL + Redis backend, React + Vite dashboard, one-command Docker Compose. Book, track, price, and report on shipments with server-enforced state machines and immutable scan history.
 
-[![CI](https://img.shields.io/github/actions/workflow/status/YOUR_USER/swiftcourier/ci.yml?branch=main&label=CI)](../../actions)
+[![CI](https://img.shields.io/github/actions/workflow/status/M0-AR/courier-management-system/ci.yml?branch=main&label=CI)](https://github.com/M0-AR/courier-management-system/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Stack: FastAPI + React](https://img.shields.io/badge/Stack-FastAPI_%2B_React_18-blue.svg)](#-why-this-stack)
 [![Docker Compose ready](https://img.shields.io/badge/Docker-Compose_ready-2496ED?logo=docker&logoColor=white)](#-quick-start-30-seconds)
